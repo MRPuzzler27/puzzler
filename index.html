@@ -155,156 +155,163 @@
 <body>
   <div class="container">
     <h1>ANSWER PUZZLE #1</h1>
-
     <label for="answerInput">Enter your puzzle answer:</label>
     <div class="input-group">
       <input id="answerInput" type="text" autocomplete="off" placeholder="Your answer here" />
       <button id="submitAnswerBtn">Submit</button>
     </div>
-
     <div id="status"></div>
-
     <div id="nameSection">
       <label for="nameInput">Correct! Now enter your name to join leaderboard:</label>
       <div class="input-group">
         <input id="nameInput" type="text" autocomplete="off" placeholder="Your name here" />
         <button id="submitNameBtn">Join Leaderboard</button>
       </div>
-
       <label for="gcashInput">Enter your GCash number:</label>
       <div class="input-group">
         <input id="gcashInput" type="text" autocomplete="off" placeholder="Your GCash number here" />
       </div>
-
       <div id="nameStatus" style="margin-top:0.8rem; font-size:1rem; color:#68ff6c; text-align:center;"></div>
     </div>
-
     <div id="leaderboardTitle">
       <span>🏆</span> LEADERBOARD <span>🏆</span>
     </div>
     <ul id="leaderboard"></ul>
   </div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2MWoqmkXQK3ZowM",
-    authDomain: "puzzler-60d0a.firebaseapp.com",
-    databaseURL: "https://puzzler-60d0a-default-rtdb.firebaseio.com",
-    projectId: "puzzler-60d0a",
-    storageBucket: "puzzler-60d0a.appspot.com",
-    messagingSenderId: "304551975008",
-    appId: "1:304551975008:web:1fb3ac752e681439854b05",
-    measurementId: "G-6LZ7QGST01"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2MWoqmkXQK3ZowM",
+      authDomain: "puzzler-60d0a.firebaseapp.com",
+      databaseURL: "https://puzzler-60d0a-default-rtdb.firebaseio.com",
+      projectId: "puzzler-60d0a",
+      storageBucket: "puzzler-60d0a.appspot.com",
+      messagingSenderId: "304551975008",
+      appId: "1:304551975008:web:1fb3ac752e681439854b05",
+      measurementId: "G-6LZ7QGST01"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  const answerInput = document.getElementById('answerInput');
-  const submitAnswerBtn = document.getElementById('submitAnswerBtn');
-  const status = document.getElementById('status');
-  const nameSection = document.getElementById('nameSection');
-  const nameInput = document.getElementById('nameInput');
-  const gcashInput = document.getElementById('gcashInput');
-  const submitNameBtn = document.getElementById('submitNameBtn');
-  const nameStatus = document.getElementById('nameStatus');
-  const leaderboard = document.getElementById('leaderboard');
+    const answerInput = document.getElementById('answerInput');
+    const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+    const status = document.getElementById('status');
+    const nameSection = document.getElementById('nameSection');
+    const nameInput = document.getElementById('nameInput');
+    const gcashInput = document.getElementById('gcashInput');
+    const submitNameBtn = document.getElementById('submitNameBtn');
+    const nameStatus = document.getElementById('nameStatus');
+    const leaderboard = document.getElementById('leaderboard');
 
-  submitAnswerBtn.onclick = () => {
-    const val = answerInput.value.trim();
-    if (val === "") {
-      status.style.color = '#ff4444';
-      status.textContent = "❌ Please enter an answer.";
-      return;
-    }
-
-    status.style.color = '#39ff14';
-    status.textContent = "⏳ Checking answer...";
-
-    // Try a test write to solvers to check if answer = "123" per rules
-    const testRef = db.ref("solvers").push();
-    testRef.set({
-      answer: val,
-      gcash: "__test__"
-    }).then(() => {
-      status.style.color = '#68ff6c';
-      status.textContent = "✔️ Correct answer! Please enter your name below.";
-      answerInput.disabled = true;
-      submitAnswerBtn.disabled = true;
-      nameSection.style.display = 'block';
-      nameInput.focus();
-      // Remove test record immediately
-      testRef.remove();
-    }).catch(() => {
-      status.style.color = '#ff4444';
-      status.textContent = "❌ Incorrect answer, try again.";
-    });
-  };
-
-  submitNameBtn.onclick = () => {
-    const nameVal = nameInput.value.trim();
-    if (nameVal === "") {
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "Name cannot be empty.";
-      nameInput.focus();
-      return;
-    }
-    const gcashVal = gcashInput.value.trim();
-    if (gcashVal === "") {
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "GCash number cannot be empty.";
-      gcashInput.focus();
-      return;
-    }
-
-    const answerVal = answerInput.value.trim();
-    const uid = db.ref("solvers").push().key;
-
-    const privateRef = db.ref("solvers/" + uid);
-    const publicRef = db.ref("winners/" + uid);
-
-    privateRef.set({
-      answer: answerVal,
-      gcash: gcashVal
-    }).then(() => {
-      return publicRef.set({
-        name: nameVal,
-        timestamp: Date.now()
+    submitAnswerBtn.onclick = () => {
+      const val = answerInput.value.trim();
+      if (val === "") {
+        status.style.color = '#ff4444';
+        status.textContent = "❌ Please enter an answer.";
+        return;
+      }
+      status.style.color = '#39ff14';
+      status.textContent = "⏳ Checking answer...";
+      const testRef = db.ref("solvers").push();
+      testRef.set({
+        answer: val,
+        gcash: "__test__"
+      }).then(() => {
+        status.style.color = '#68ff6c';
+        status.textContent = "✔️ Correct answer! Please enter your name below.";
+        answerInput.disabled = true;
+        submitAnswerBtn.disabled = true;
+        nameSection.style.display = 'block';
+        nameInput.focus();
+        testRef.remove();
+      }).catch(() => {
+        status.style.color = '#ff4444';
+        status.textContent = "❌ Incorrect answer, try again.";
       });
-    }).then(() => {
-      nameStatus.style.color = '#68ff6c';
-      nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
-      nameInput.value = "";
-      gcashInput.value = "";
-      nameInput.disabled = true;
-      gcashInput.disabled = true;
-      submitNameBtn.disabled = true;
-    }).catch(() => {
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "Error adding to leaderboard. Try again.";
-    });
-  };
+    };
 
-  function toOrdinal(n) {
-    let s = ["th", "st", "nd", "rd"],
-      v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  }
-
-  db.ref("winners").on("value", snapshot => {
-    leaderboard.innerHTML = "";
-    const data = snapshot.val();
-    if (data) {
-      const sorted = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
-      let realIndex = 0;
-      sorted.forEach(entry => {
-        realIndex++;
-        const li = document.createElement("li");
-        li.innerHTML = `<span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name}`;
-        leaderboard.appendChild(li);
+    submitNameBtn.onclick = () => {
+      const nameVal = nameInput.value.trim();
+      if (nameVal === "") {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "Name cannot be empty.";
+        nameInput.focus();
+        return;
+      }
+      const gcashVal = gcashInput.value.trim();
+      if (gcashVal === "") {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "GCash number cannot be empty.";
+        gcashInput.focus();
+        return;
+      }
+      const answerVal = answerInput.value.trim();
+      const uid = db.ref("solvers").push().key;
+      const privateRef = db.ref("solvers/" + uid);
+      const publicRef = db.ref("winners/" + uid);
+      privateRef.set({
+        answer: answerVal,
+        gcash: gcashVal
+      }).then(() => {
+        return publicRef.set({
+          name: nameVal,
+          timestamp: Date.now()
+        });
+      }).then(() => {
+        nameStatus.style.color = '#68ff6c';
+        nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
+        nameInput.value = "";
+        gcashInput.value = "";
+        nameInput.disabled = true;
+        gcashInput.disabled = true;
+        submitNameBtn.disabled = true;
+      }).catch(() => {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "Error adding to leaderboard. Try again.";
       });
+    };
+
+    function toOrdinal(n) {
+      let s = ["th", "st", "nd", "rd"],
+          v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
-  });
-</script>
+
+    db.ref("winners").on("value", snapshot => {
+      leaderboard.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        const sorted = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+        let realIndex = 0;
+        sorted.forEach(entry => {
+          realIndex++;
+          const li = document.createElement("li");
+          li.innerHTML = `<span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name}`;
+          leaderboard.appendChild(li);
+        });
+      }
+    });
+  </script>
+
+  <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #11141e;
+    color: #39ff14cc;
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.2rem 0;
+    user-select: none;
+    z-index: 1000;
+  ">
+    Follow me for more puzzles:
+    <a href="https://www.facebook.com/limuel.sanchez.klb/" target="_blank" rel="noopener noreferrer" style="color:#68ff6c; text-decoration:none;">
+      facebook
+    </a>
+  </footer>
 </body>
 </html>
