@@ -23,7 +23,6 @@
         linear-gradient(90deg, rgba(57,255,20,0.05) 1px, transparent 1px);
       background-size: 40px 40px;
     }
-
     .container {
       background: #11141e;
       border: 2px solid #39ff14;
@@ -34,22 +33,19 @@
       box-sizing: border-box;
       box-shadow: 0 0 20px #39ff14aa;
     }
-
     h1 {
-      font-size: 6rem;
+      font-size: 20rem;
       text-align: center;
       margin-bottom: 1.2rem;
       user-select: none;
       text-shadow: 0 0 10px #39ff14aa;
     }
-
     label {
       display: block;
       margin-bottom: 0.25rem;
       font-size: 1.2rem;
       user-select: none;
     }
-
     input[type=text] {
       width: 100%;
       padding: 0.6rem 0.75rem;
@@ -62,14 +58,12 @@
       text-shadow: 0 0 5px #39ff14bb;
       box-sizing: border-box;
     }
-
     input[type=text]:focus {
       outline: none;
       border-color: #68ff6c;
       box-shadow: 0 0 15px #68ff6caa;
       background: #12161f;
     }
-
     .input-group {
       display: flex;
       flex-direction: column;
@@ -77,7 +71,6 @@
       align-items: center;
       justify-content: center;
     }
-
     button {
       background: #0a0c13;
       border: 2px solid #39ff14;
@@ -94,13 +87,11 @@
       width: 100%;
       max-width: 260px;
     }
-
     button:hover {
       background: #39ff14;
       color: #0a0c13;
       box-shadow: 0 0 20px #39ff14cc;
     }
-
     #status {
       margin-top: 1rem;
       font-size: 1.1rem;
@@ -109,12 +100,10 @@
       user-select: none;
       letter-spacing: 1px;
     }
-
     #nameSection {
       margin-top: 2rem;
       display: none;
     }
-
     #leaderboardTitle {
       font-size: 1.8rem;
       margin: 2rem 0 1rem 0;
@@ -122,13 +111,11 @@
       user-select: none;
       letter-spacing: 2px;
     }
-
     #leaderboardTitle span {
       margin: 0 1rem;
       font-size: 0.4em;
       filter: drop-shadow(0 0 3px #39ff14);
     }
-
     #leaderboard {
       list-style: none;
       padding: 0;
@@ -136,7 +123,6 @@
       max-width: 300px;
       user-select: text;
     }
-
     #leaderboard li {
       font-size: 1.3rem;
       margin: 0.15rem 0;
@@ -145,25 +131,20 @@
       letter-spacing: 0.03em;
       padding-left: 2.5rem;
     }
-
     @media screen and (max-width: 480px) {
       h1 {
         font-size: 3rem;
       }
-
       .container {
         padding: 1rem;
       }
-
       button {
         padding: 1.2rem 3rem;
         font-size: 1.2rem;
       }
-
       input[type=text] {
         font-size: 1.1rem;
       }
-
       #leaderboard li {
         font-size: 1.1rem;
         padding-left: 2rem;
@@ -200,7 +181,7 @@
 
 <script>
   const firebaseConfig = {
-    apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2iMWoqmkXQK3ZowM",
+    apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2MWoqmkXQK3ZowM",
     authDomain: "puzzler-60d0a.firebaseapp.com",
     databaseURL: "https://puzzler-60d0a-default-rtdb.firebaseio.com",
     projectId: "puzzler-60d0a",
@@ -224,17 +205,39 @@
 
   submitAnswerBtn.onclick = () => {
     const val = answerInput.value.trim();
-    if(val === "123"){
+    if(val === "") {
+      status.style.color = '#ff4444';
+      status.textContent = "❌ Please enter an answer.";
+      return;
+    }
+
+    status.style.color = '#39ff14';
+    status.textContent = "⏳ Checking answer...";
+
+    // Try to write a test record to verify the answer with Firebase rules
+    const testRef = db.ref("solvers").push();
+    testRef.set({
+      name: "__test__",
+      timestamp: Date.now(),
+      answer: val
+    })
+    .then(() => {
+      // Correct answer: allow name input
       status.style.color = '#68ff6c';
       status.textContent = "✔️ Correct answer! Please enter your name below.";
       answerInput.disabled = true;
       submitAnswerBtn.disabled = true;
       nameSection.style.display = 'block';
       nameInput.focus();
-    } else {
+
+      // Remove test record right away
+      testRef.remove();
+    })
+    .catch(() => {
+      // Wrong answer: show error
       status.style.color = '#ff4444';
       status.textContent = "❌ Incorrect answer, try again.";
-    }
+    });
   };
 
   submitNameBtn.onclick = () => {
@@ -245,27 +248,47 @@
       nameInput.focus();
       return;
     }
+    const answerVal = answerInput.value.trim();
+
+    // Add actual solver entry
     const newRef = db.ref("solvers").push();
     newRef.set({
       name: nameVal,
       timestamp: Date.now(),
-      answer: "123"
+      answer: answerVal
+    })
+    .then(() => {
+      nameStatus.style.color = '#68ff6c';
+      nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
+      nameInput.value = "";
+      nameInput.disabled = true;
+      submitNameBtn.disabled = true;
+    })
+    .catch(() => {
+      nameStatus.style.color = '#ff4444';
+      nameStatus.textContent = "Error adding to leaderboard. Try again.";
     });
-    nameStatus.style.color = '#68ff6c';
-    nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
-    nameInput.value = "";
-    nameInput.disabled = true;
-    submitNameBtn.disabled = true;
   };
 
+  function toOrdinal(n) {
+    let s = ["th", "st", "nd", "rd"],
+        v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  // Load leaderboard and display
   db.ref("solvers").on("value", snapshot => {
     leaderboard.innerHTML = "";
     const data = snapshot.val();
     if(data){
       const sorted = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
-      sorted.forEach((entry, index) => {
+      let realIndex = 0;
+      sorted.forEach((entry) => {
+        // Skip test entries just in case
+        if(entry.name === "__test__") return;
+        realIndex++;
         const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${entry.name}`;
+        li.innerHTML = `<span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name}`;
         leaderboard.appendChild(li);
       });
     }
