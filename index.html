@@ -170,6 +170,12 @@
         <input id="nameInput" type="text" autocomplete="off" placeholder="Your name here" />
         <button id="submitNameBtn">Join Leaderboard</button>
       </div>
+
+      <label for="gcashInput">Enter your GCash number:</label>
+      <div class="input-group">
+        <input id="gcashInput" type="text" autocomplete="off" placeholder="Your GCash number here" />
+      </div>
+
       <div id="nameStatus" style="margin-top:0.8rem; font-size:1rem; color:#68ff6c; text-align:center;"></div>
     </div>
 
@@ -199,13 +205,14 @@
   const status = document.getElementById('status');
   const nameSection = document.getElementById('nameSection');
   const nameInput = document.getElementById('nameInput');
+  const gcashInput = document.getElementById('gcashInput');
   const submitNameBtn = document.getElementById('submitNameBtn');
   const nameStatus = document.getElementById('nameStatus');
   const leaderboard = document.getElementById('leaderboard');
 
   submitAnswerBtn.onclick = () => {
     const val = answerInput.value.trim();
-    if(val === "") {
+    if (val === "") {
       status.style.color = '#ff4444';
       status.textContent = "❌ Please enter an answer.";
       return;
@@ -214,27 +221,21 @@
     status.style.color = '#39ff14';
     status.textContent = "⏳ Checking answer...";
 
-    // Try to write a test record to verify the answer with Firebase rules
+    // Try a test write to solvers to check if answer = "123" per rules
     const testRef = db.ref("solvers").push();
     testRef.set({
-      name: "__test__",
-      timestamp: Date.now(),
-      answer: val
-    })
-    .then(() => {
-      // Correct answer: allow name input
+      answer: val,
+      gcash: "__test__"
+    }).then(() => {
       status.style.color = '#68ff6c';
       status.textContent = "✔️ Correct answer! Please enter your name below.";
       answerInput.disabled = true;
       submitAnswerBtn.disabled = true;
       nameSection.style.display = 'block';
       nameInput.focus();
-
-      // Remove test record right away
+      // Remove test record immediately
       testRef.remove();
-    })
-    .catch(() => {
-      // Wrong answer: show error
+    }).catch(() => {
       status.style.color = '#ff4444';
       status.textContent = "❌ Incorrect answer, try again.";
     });
@@ -242,29 +243,43 @@
 
   submitNameBtn.onclick = () => {
     const nameVal = nameInput.value.trim();
-    if(nameVal === ""){
+    if (nameVal === "") {
       nameStatus.style.color = '#ff4444';
       nameStatus.textContent = "Name cannot be empty.";
       nameInput.focus();
       return;
     }
-    const answerVal = answerInput.value.trim();
+    const gcashVal = gcashInput.value.trim();
+    if (gcashVal === "") {
+      nameStatus.style.color = '#ff4444';
+      nameStatus.textContent = "GCash number cannot be empty.";
+      gcashInput.focus();
+      return;
+    }
 
-    // Add actual solver entry
-    const newRef = db.ref("solvers").push();
-    newRef.set({
-      name: nameVal,
-      timestamp: Date.now(),
-      answer: answerVal
-    })
-    .then(() => {
+    const answerVal = answerInput.value.trim();
+    const uid = db.ref("solvers").push().key;
+
+    const privateRef = db.ref("solvers/" + uid);
+    const publicRef = db.ref("winners/" + uid);
+
+    privateRef.set({
+      answer: answerVal,
+      gcash: gcashVal
+    }).then(() => {
+      return publicRef.set({
+        name: nameVal,
+        timestamp: Date.now()
+      });
+    }).then(() => {
       nameStatus.style.color = '#68ff6c';
       nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
       nameInput.value = "";
+      gcashInput.value = "";
       nameInput.disabled = true;
+      gcashInput.disabled = true;
       submitNameBtn.disabled = true;
-    })
-    .catch(() => {
+    }).catch(() => {
       nameStatus.style.color = '#ff4444';
       nameStatus.textContent = "Error adding to leaderboard. Try again.";
     });
@@ -272,20 +287,17 @@
 
   function toOrdinal(n) {
     let s = ["th", "st", "nd", "rd"],
-        v = n % 100;
+      v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
-  // Load leaderboard and display
-  db.ref("solvers").on("value", snapshot => {
+  db.ref("winners").on("value", snapshot => {
     leaderboard.innerHTML = "";
     const data = snapshot.val();
-    if(data){
-      const sorted = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
+    if (data) {
+      const sorted = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
       let realIndex = 0;
-      sorted.forEach((entry) => {
-        // Skip test entries just in case
-        if(entry.name === "__test__") return;
+      sorted.forEach(entry => {
         realIndex++;
         const li = document.createElement("li");
         li.innerHTML = `<span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name}`;
