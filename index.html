@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🧩 Puzzle #1 Terminal</title>
+  <title>🧩 Puzzle #2 Terminal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -152,12 +152,34 @@
     }
   </style>
 </head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding-top: 2rem;">
+  <div style="max-width: 500px; width: 100%; background: #0f111a; border: 1px solid #39ff14; padding: 1rem; border-radius: 6px; box-shadow: 0 0 15px #39ff14aa; font-family: 'VT323', monospace; text-align: center;">
+    <label for="md5Input" style="display:block; margin-bottom:0.25rem;">
+      <i>"I spread my form, unique and rare.<br>No stem, no leaf, yet I unfold,<br>A fleeting marvel, crimson-bold.<br>Rootless, I thrive on another's might,<br>What am I, blooming in jungle night?"</i>
+    </label>
+    <input type="text" id="md5Input" placeholder="Enter Key word 1" style="width:100%; margin-bottom:0.4rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
+    
+    <label for="saltInput" style="display:block; margin-bottom:0.25rem;">Listen to the audio to get the 2nd keyword
+      <center><audio controls><source src="https://mrpuzzler27.github.io/puzzler/solvethisprivate.mp3" type="audio/mpeg"></audio></center>
+    </label>
+    <input type="text" id="saltInput" placeholder="Enter Key word 2" style="width:100%; margin-bottom:0.4rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
+
+    <button onclick="const text = document.getElementById('md5Input').value; const salt = document.getElementById('saltInput').value; document.getElementById('md5Output').value = SparkMD5.hash(text + salt);" style="margin-top:0.5rem; padding:0.5rem 1rem; background:#0a0c13; color:#39ff14; border:1px solid #39ff14; cursor:pointer; font-family:'VT323', monospace;">Generate Answer</button>
+
+    <input type="text" id="md5Output" readonly placeholder="Generated answer code" style="width:100%; margin-top:0.5rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
+  </div>
+
+
+
 <body>
   <div class="container">
-    <h1>ANSWER PUZZLE #1</h1>
+    <h1>ANSWER PUZZLE #2</h1>
     <label for="answerInput">Enter your puzzle answer:</label>
     <div class="input-group">
-      <input id="answerInput" type="text" autocomplete="off" placeholder="Your answer here" />
+      <input id="answerInput" type="text" autocomplete="off" placeholder="Paste your answer code here" />
       <button id="submitAnswerBtn">Submit</button>
     </div>
     <div id="status"></div>
@@ -315,3 +337,4 @@
   </footer>
 </body>
 </html>
+
