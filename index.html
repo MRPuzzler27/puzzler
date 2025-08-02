@@ -7,11 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
   <style>
-   body {
+    body {
       font-family: 'VT323', monospace;
       background: #0f111a;
       color: #39ff14;
@@ -155,209 +153,165 @@
   </style>
 </head>
 <body>
-
-
-<div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding-top: 2rem;">
-
-    <div style="
-      max-width: 500px;
-      width: 100%;
-      background: #0f111a;
-      border: 1px solid #39ff14;
-      padding: 1rem;
-      border-radius: 6px;
-      box-shadow: 0 0 15px #39ff14aa;
-      font-family: 'VT323', monospace;
-      text-align: center;
-    ">
-      <label for="md5Input" style="display:block; margin-bottom:0.25rem;"><i>"I spread my form, unique and rare.<br>
-
-No stem, no leaf, yet I unfold,<br>
-
-A fleeting marvel, crimson-bold.<br>
-
-Rootless, I thrive on another's might,<br>
-
-What am I, blooming in jungle night?"</i></p></label>
-      <input type="text" id="md5Input" placeholder="Enter answer" style="width:100%; margin-bottom:0.4rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
-      
-      <label for="saltInput" style="display:block; margin-bottom:0.25rem;"><center><audio controls>
-  <source src="https://mrpuzzler27.github.io/puzzler/solvethisprivate.mp3" type="audio/mpeg">
-</audio></center></label>
-      <input type="text" id="saltInput" placeholder="Enter answer" style="width:100%; margin-bottom:0.4rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
-
-      <button onclick="
-        const text = document.getElementById('md5Input').value;
-        const salt = document.getElementById('saltInput').value;
-        document.getElementById('md5Output').value = SparkMD5.hash(text + salt);
-      " style="margin-top:0.5rem; padding:0.5rem 1rem; background:#0a0c13; color:#39ff14; border:1px solid #39ff14; cursor:pointer; font-family:'VT323', monospace;">Generate Answer</button>
-
-      <input type="text" id="md5Output" readonly placeholder="MD5 hash output" style="width:100%; margin-top:0.5rem; padding:0.5rem; background:#0a0c13; border:1px solid #39ff14; color:#39ff14; font-family:'VT323', monospace;">
-    </div>
-
-
   <div class="container">
     <h1>ANSWER PUZZLE #1</h1>
-
     <label for="answerInput">Enter your puzzle answer:</label>
     <div class="input-group">
       <input id="answerInput" type="text" autocomplete="off" placeholder="Your answer here" />
       <button id="submitAnswerBtn">Submit</button>
     </div>
-
     <div id="status"></div>
-
     <div id="nameSection">
       <label for="nameInput">Correct! Now enter your name to join leaderboard:</label>
       <div class="input-group">
         <input id="nameInput" type="text" autocomplete="off" placeholder="Your name here" />
         <button id="submitNameBtn">Join Leaderboard</button>
       </div>
-
       <label for="gcashInput">Enter your GCash number:</label>
       <div class="input-group">
         <input id="gcashInput" type="text" autocomplete="off" placeholder="Your GCash number here" />
       </div>
-
       <div id="nameStatus" style="margin-top:0.8rem; font-size:1rem; color:#68ff6c; text-align:center;"></div>
     </div>
-
     <div id="leaderboardTitle">
       <span>🏆</span> LEADERBOARD <span>🏆</span>
     </div>
     <ul id="leaderboard"></ul>
   </div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2MWoqmkXQK3ZowM",
-    authDomain: "puzzler-60d0a.firebaseapp.com",
-    databaseURL: "https://puzzler-60d0a-default-rtdb.firebaseio.com",
-    projectId: "puzzler-60d0a",
-    storageBucket: "puzzler-60d0a.appspot.com",
-    messagingSenderId: "304551975008",
-    appId: "1:304551975008:web:1fb3ac752e681439854b05",
-    measurementId: "G-6LZ7QGST01"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzPq5u-oeMZAd7jqI2MWoqmkXQK3ZowM",
+      authDomain: "puzzler-60d0a.firebaseapp.com",
+      databaseURL: "https://puzzler-60d0a-default-rtdb.firebaseio.com",
+      projectId: "puzzler-60d0a",
+      storageBucket: "puzzler-60d0a.appspot.com",
+      messagingSenderId: "304551975008",
+      appId: "1:304551975008:web:1fb3ac752e681439854b05",
+      measurementId: "G-6LZ7QGST01"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  const answerInput = document.getElementById('answerInput');
-  const submitAnswerBtn = document.getElementById('submitAnswerBtn');
-  const status = document.getElementById('status');
-  const nameSection = document.getElementById('nameSection');
-  const nameInput = document.getElementById('nameInput');
-  const gcashInput = document.getElementById('gcashInput');
-  const submitNameBtn = document.getElementById('submitNameBtn');
-  const nameStatus = document.getElementById('nameStatus');
-  const leaderboard = document.getElementById('leaderboard');
+    const answerInput = document.getElementById('answerInput');
+    const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+    const status = document.getElementById('status');
+    const nameSection = document.getElementById('nameSection');
+    const nameInput = document.getElementById('nameInput');
+    const gcashInput = document.getElementById('gcashInput');
+    const submitNameBtn = document.getElementById('submitNameBtn');
+    const nameStatus = document.getElementById('nameStatus');
+    const leaderboard = document.getElementById('leaderboard');
 
-  submitAnswerBtn.onclick = () => {
-    const val = answerInput.value.trim();
-    if(val === "") {
-      status.style.color = '#ff4444';
-      status.textContent = "❌ Please enter an answer.";
-      return;
-    }
-
-    status.style.color = '#39ff14';
-    status.textContent = "⏳ Checking answer...";
-
-    // Hash only the answer (no salt needed)
-    const answerHash = CryptoJS.SHA256(val.toLowerCase().trim()).toString();
-
-    const testRef = db.ref("solvers").push();
-    testRef.set({
-      name: "__test__",
-      timestamp: Date.now(),
-      answer: answerHash  // Only the answer is hashed
-    })
-    .then(() => {
-      status.style.color = '#68ff6c';
-      status.textContent = "✔️ Correct answer! Please enter your name below.";
-      answerInput.disabled = true;
-      submitAnswerBtn.disabled = true;
-      nameSection.style.display = 'block';
-      nameInput.focus();
-      testRef.remove();
-    })
-    .catch(() => {
-      status.style.color = '#ff4444';
-      status.textContent = "❌ Incorrect answer, try again.";
-    });
-  };
-
-  submitNameBtn.onclick = () => {
-    const nameVal = nameInput.value.trim();
-    if(nameVal === ""){
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "Name cannot be empty.";
-      nameInput.focus();
-      return;
-    }
-    const gcashVal = gcashInput.value.trim();
-    if(gcashVal === ""){
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "GCash number cannot be empty.";
-      gcashInput.focus();
-      return;
-    }
-
-    const answerVal = answerInput.value.trim();
-    const answerHash = CryptoJS.SHA256(answerVal.toLowerCase().trim()).toString();
-
-    const newRef = db.ref("solvers").push();
-    newRef.set({
-      name: nameVal,          // Stored in plain text
-      gcash: gcashVal,        // Stored in plain text
-      answer: answerHash,     // Only the answer is hashed
-      timestamp: Date.now()
-    })
-    .then(() => {
-      nameStatus.style.color = '#68ff6c';
-      nameStatus.textContent = ✅ ${nameVal}, you have been added to the leaderboard.;
-      nameInput.value = "";
-      gcashInput.value = "";
-      nameInput.disabled = true;
-      gcashInput.disabled = true;
-      submitNameBtn.disabled = true;
-    })
-    .catch(() => {
-      nameStatus.style.color = '#ff4444';
-      nameStatus.textContent = "Error adding to leaderboard. Try again.";
-    });
-  };
-
-  function toOrdinal(n) {
-    let s = ["th", "st", "nd", "rd"],
-        v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  }
-
-  db.ref("solvers").on("value", snapshot => {
-    leaderboard.innerHTML = "";
-    const data = snapshot.val();
-    if(data){
-      const sorted = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
-      let realIndex = 0;
-      sorted.forEach((entry) => {
-        if(entry.name === "__test__") return;
-        realIndex++;
-        const li = document.createElement("li");
-        li.innerHTML = <span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name};
-        leaderboard.appendChild(li);
+    submitAnswerBtn.onclick = () => {
+      const val = answerInput.value.trim();
+      if (val === "") {
+        status.style.color = '#ff4444';
+        status.textContent = "❌ Please enter an answer.";
+        return;
+      }
+      status.style.color = '#39ff14';
+      status.textContent = "⏳ Checking answer...";
+      const testRef = db.ref("solvers").push();
+      testRef.set({
+        answer: val,
+        gcash: "__test__"
+      }).then(() => {
+        status.style.color = '#68ff6c';
+        status.textContent = "✔️ Correct answer! Please enter your name below.";
+        answerInput.disabled = true;
+        submitAnswerBtn.disabled = true;
+        nameSection.style.display = 'block';
+        nameInput.focus();
+        testRef.remove();
+      }).catch(() => {
+        status.style.color = '#ff4444';
+        status.textContent = "❌ Incorrect answer, try again.";
       });
+    };
+
+    submitNameBtn.onclick = () => {
+      const nameVal = nameInput.value.trim();
+      if (nameVal === "") {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "Name cannot be empty.";
+        nameInput.focus();
+        return;
+      }
+      const gcashVal = gcashInput.value.trim();
+      if (gcashVal === "") {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "GCash number cannot be empty.";
+        gcashInput.focus();
+        return;
+      }
+      const answerVal = answerInput.value.trim();
+      const uid = db.ref("solvers").push().key;
+      const privateRef = db.ref("solvers/" + uid);
+      const publicRef = db.ref("winners/" + uid);
+      privateRef.set({
+        answer: answerVal,
+        gcash: gcashVal
+      }).then(() => {
+        return publicRef.set({
+          name: nameVal,
+          timestamp: Date.now()
+        });
+      }).then(() => {
+        nameStatus.style.color = '#68ff6c';
+        nameStatus.textContent = `✅ ${nameVal}, you have been added to the leaderboard.`;
+        nameInput.value = "";
+        gcashInput.value = "";
+        nameInput.disabled = true;
+        gcashInput.disabled = true;
+        submitNameBtn.disabled = true;
+      }).catch(() => {
+        nameStatus.style.color = '#ff4444';
+        nameStatus.textContent = "Error adding to leaderboard. Try again.";
+      });
+    };
+
+    function toOrdinal(n) {
+      let s = ["th", "st", "nd", "rd"],
+          v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
-  });
 
+    db.ref("winners").on("value", snapshot => {
+      leaderboard.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        const sorted = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+        let realIndex = 0;
+        sorted.forEach(entry => {
+          realIndex++;
+          const li = document.createElement("li");
+          li.innerHTML = `<span style="font-size:0.7em;">${toOrdinal(realIndex)}.</span> ${entry.name}`;
+          leaderboard.appendChild(li);
+        });
+      }
+    });
+  </script>
 
-</script>
-
-
-
+  <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #11141e;
+    color: #39ff14cc;
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.2rem 0;
+    user-select: none;
+    z-index: 1000;
+  ">
+    Follow me for more puzzles:
+    <a href="https://www.facebook.com/limuel.sanchez.klb/" target="_blank" rel="noopener noreferrer" style="color:#68ff6c; text-decoration:none;">
+      facebook
+    </a>
+  </footer>
 </body>
 </html>
-
-
-
